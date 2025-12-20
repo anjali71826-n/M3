@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INDMoney Fees AI Agent | Instant Clarity on Charges & Fees</title>
+    <meta name="description"
+        content="Get instant, source-backed explanations of INDMoney fees for US Stocks, Mutual Funds, and Indian Stocks. AI-powered with official citations.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0a0a;
+            --bg-card: #141416;
+            --bg-elevated: #1c1c1e;
+            --bg-input: #252528;
+            --text-primary: #f5f5f7;
+            --text-secondary: #98989d;
+            --text-tertiary: #636366;
+            --accent-blue: #0071e3;
+            --accent-blue-hover: #0077ed;
+            --accent-green: #30d158;
+            --accent-orange: #ff9f0a;
+            --accent-red: #ff453a;
+            --border-subtle: rgba(255, 255, 255, 0.1);
+            --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.6);
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            /* No scrolling */
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a1a 100%);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1000px;
+            height: 1000px;
+            background: radial-gradient(circle, rgba(0, 113, 227, 0.12) 0%, transparent 70%);
+            pointer-events: none;
+            animation: pulse 8s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: translateX(-50%) scale(1);
+                opacity: 0.3;
+            }
+
+            50% {
+                transform: translateX(-50%) scale(1.1);
+                opacity: 0.5;
+            }
+        }
+
+        /* Main container - full viewport */
+        .container {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+            padding: 0;
+        }
+
+        /* Header Section */
+        .header-section {
+            flex-shrink: 0;
+            text-align: center;
+            padding: 40px 24px 20px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            background: rgba(0, 113, 227, 0.1);
+            border: 1px solid rgba(0, 113, 227, 0.3);
+            border-radius: 100px;
+            color: var(--accent-blue);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        h1 {
+            font-size: clamp(32px, 5vw, 56px);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: clamp(15px, 2vw, 19px);
+            color: var(--text-secondary);
+            font-weight: 400;
+            margin: 0;
+        }
+
+        /* Main Content - Centered */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 24px 40px;
+            overflow: hidden;
+        }
+
+        /* Chat Card */
+        .chat-card {
+            width: 100%;
+            max-width: 900px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-xl);
+            padding: 28px;
+            box-shadow: var(--shadow-lg);
+            backdrop-filter: blur(20px);
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 280px);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Conversation Area */
+        .conversation-area {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: var(--bg-dark);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-subtle);
+            min-height: 200px;
+        }
+
+        .conversation-area::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .conversation-area::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+            border-radius: 4px;
+        }
+
+        .conversation-area::-webkit-scrollbar-thumb {
+            background: var(--text-tertiary);
+            border-radius: 4px;
+        }
+
+        .conversation-area::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        /* Messages */
+        .message {
+            margin-bottom: 20px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .message-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .message-avatar.user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .message-avatar.agent {
+            background: linear-gradient(135deg, #0071e3 0%, #00a8ff 100%);
+        }
+
+        .message-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            margin-left: auto;
+        }
+
+        .message-content {
+            padding: 16px;
+            border-radius: var(--radius-md);
+            margin-left: 36px;
+        }
+
+        .message.user .message-content {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .message.agent .message-content {
+            background: rgba(0, 113, 227, 0.05);
+            border: 1px solid rgba(0, 113, 227, 0.2);
+        }
+
+        /* Clarification Options */
+        .clarification-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .clarification-btn {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .clarification-btn:hover {
+            background: var(--bg-input);
+            border-color: var(--accent-blue);
+            transform: translateX(4px);
+        }
+
+        /* Fee Breakdown */
+        .fee-breakdown {
+            margin-top: 16px;
+            padding: 16px;
+            background: var(--bg-dark);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .fee-item {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .fee-item:last-child {
+            border-bottom: none;
+        }
+
+        .fee-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .fee-value {
+            font-size: 16px;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* Source Citation */
+        .source-citation {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 12px;
+            padding: 8px 12px;
+            background: rgba(48, 209, 88, 0.1);
+            border: 1px solid rgba(48, 209, 88, 0.3);
+            border-radius: 8px;
+            font-size: 12px;
+            color: var(--accent-green);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .source-citation:hover {
+            background: rgba(48, 209, 88, 0.15);
+            transform: translateY(-2px);
+        }
+
+        /* Approval Status */
+        .approval-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 16px;
+        }
+
+        .approval-status.pending {
+            background: rgba(255, 159, 10, 0.1);
+            border: 1px solid rgba(255, 159, 10, 0.3);
+            color: var(--accent-orange);
+        }
+
+        .approval-status.approved {
+            background: rgba(48, 209, 88, 0.1);
+            border: 1px solid rgba(48, 209, 88, 0.3);
+            color: var(--accent-green);
+        }
+
+        .approval-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: var(--accent-orange);
+            color: white;
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .approval-link:hover {
+            background: #ffb340;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 159, 10, 0.3);
+        }
+
+        /* Input Area */
+        .input-area {
+            flex-shrink: 0;
+        }
+
+        label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        textarea {
+            flex: 1;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 15px;
+            font-family: inherit;
+            padding: 14px;
+            resize: none;
+            outline: none;
+            transition: all 0.2s ease;
+            min-height: 50px;
+            max-height: 100px;
+        }
+
+        textarea:focus {
+            border-color: var(--accent-blue);
+            background: var(--bg-elevated);
+            box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+        }
+
+        textarea::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        button {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 14px 28px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        button:hover:not(:disabled) {
+            background: var(--accent-blue-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 113, 227, 0.3);
+        }
+
+        button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Quick Examples */
+        .quick-examples {
+            margin-top: 14px;
+            padding: 14px;
+            background: var(--bg-dark);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .quick-examples-title {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .example-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .example-chip {
+            padding: 8px 14px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            border-radius: 100px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .example-chip:hover {
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border-color: var(--accent-blue);
+            transform: translateY(-2px);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 24px;
+            color: var(--text-tertiary);
+        }
+
+        .empty-state-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            font-size: 14px;
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 400px;
+            animation: slideInRight 0.3s ease-out;
+            z-index: 1000;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .toast.success {
+            border-color: var(--accent-green);
+            background: rgba(48, 209, 88, 0.1);
+        }
+
+        .toast.error {
+            border-color: var(--accent-red);
+            background: rgba(255, 69, 58, 0.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-section {
+                padding: 30px 20px 15px;
+            }
+
+            .chat-card {
+                padding: 20px;
+                max-height: calc(100vh - 220px);
+            }
+
+            .input-wrapper {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <!-- Header Section -->
+        <div class="header-section">
+            <div class="badge">
+                <span>AI-POWERED</span>
+            </div>
+            <h1>INDMoney Fees & Charges Explainer</h1>
+            <p class="subtitle">Get instant, source-backed answers about fees for US Stocks, Mutual Funds, and Indian
+                Stocks</p>
+        </div>
+
+        <!-- Main Content - Centered -->
+        <div class="main-content">
+            <div class="chat-card">
+                <!-- Conversation Area -->
+                <div class="conversation-area" id="conversationArea">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">💬</div>
+                        <div class="empty-state-text">Ask a question to get started</div>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="input-area">
+                    <label for="userQuery">YOUR QUESTION</label>
+                    <div class="input-wrapper">
+                        <textarea id="userQuery" placeholder="e.g., What are the charges for US stock trading?"
+                            rows="1"></textarea>
+                        <button id="sendBtn" onclick="sendMessage()">
+                            <span id="btnText">Send</span>
+                        </button>
+                    </div>
+
+                    <!-- Quick Examples -->
+                    <div class="quick-examples">
+                        <div class="quick-examples-title">Try asking:</div>
+                        <div class="example-chips">
+                            <div class="example-chip"
+                                onclick="fillExample('What are the brokerage charges for US stocks?')">
+                                US Stock Brokerage
+                            </div>
+                            <div class="example-chip"
+                                onclick="fillExample('Are there any fees for mutual fund investments?')">
+                                Mutual Fund Fees
+                            </div>
+                            <div class="example-chip"
+                                onclick="fillExample('What charges apply to Indian stock trades?')">
+                                Indian Stocks
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Configuration
+            const WEBHOOK_URL = 'https://anjali71826.app.n8n.cloud/webhook/indmoney-fees-agent';
+            const CONTINUE_URL = 'https://anjali71826.app.n8n.cloud/webhook/indmoney-fees-continue';
+
+            // State
+            let sessionId = 'session_' + Date.now();
+            let conversationState = 'initial'; // initial, clarifying, analyzing, completed
+            let pendingClarification = null;
+
+            // Utility: Format time
+            function formatTime() {
+                const now = new Date();
+                return now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            }
+
+            // Utility: Add message to conversation
+            function addMessage(type, content, metadata = {}) {
+                const conversationArea = document.getElementById('conversationArea');
+
+                // Remove empty state
+                const emptyState = conversationArea.querySelector('.empty-state');
+                if (emptyState) emptyState.remove();
+
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${type}`;
+
+                let messageHTML = `
+        <div class="message-header">
+          <div class="message-avatar ${type}">
+            ${type === 'user' ? 'U' : 'AI'}
+          </div>
+          <div class="message-name">${type === 'user' ? 'You' : 'AI Agent'}</div>
+          <div class="message-time">${formatTime()}</div>
+        </div>
+        <div class="message-content">
+          ${content}
+        </div>
+      `;
+
+                messageDiv.innerHTML = messageHTML;
+                conversationArea.appendChild(messageDiv);
+                conversationArea.scrollTop = conversationArea.scrollHeight;
+            }
+
+            // Fill example query
+            function fillExample(text) {
+                document.getElementById('userQuery').value = text;
+                document.getElementById('userQuery').focus();
+            }
+
+            // Show toast notification
+            function showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.style.animation = 'slideInRight 0.3s ease-out reverse';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+
+            // Handle clarification button click
+            function handleClarification(answer) {
+                addMessage('user', answer);
+                continueConversation(answer);
+            }
+
+            // Send initial message
+            async function sendMessage() {
+                const query = document.getElementById('userQuery').value.trim();
+                if (!query) return;
+
+                const sendBtn = document.getElementById('sendBtn');
+                const btnText = document.getElementById('btnText');
+
+                // Add user message
+                addMessage('user', query);
+                document.getElementById('userQuery').value = '';
+
+                // UI Loading state
+                sendBtn.disabled = true;
+                btnText.innerHTML = '<div class="spinner"></div> Analyzing...';
+
+                try {
+                    const response = await fetch(WEBHOOK_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            user_query: query,
+                            session_id: sessionId
+                        })
+                    });
+
+                    const data = await response.json();
+                    console.log('Response:', data);
+
+                    // Handle response based on type
+                    handleAgentResponse(data);
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    addMessage('agent', `<span style="color: var(--accent-red)">⚠️ Error: ${error.message}</span>`);
+                    showToast('Failed to send message', 'error');
+                } finally {
+                    sendBtn.disabled = false;
+                    btnText.textContent = 'Send';
+                }
+            }
+
+            // Continue conversation with clarification
+            async function continueConversation(answer) {
+                const sendBtn = document.getElementById('sendBtn');
+                const btnText = document.getElementById('btnText');
+
+                sendBtn.disabled = true;
+                btnText.innerHTML = '<div class="spinner"></div> Processing...';
+
+                try {
+                    const response = await fetch(CONTINUE_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            session_id: sessionId,
+                            user_answer: answer
+                        })
+                    });
+
+                    const data = await response.json();
+                    console.log('Continue Response:', data);
+
+                    handleAgentResponse(data);
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    addMessage('agent', `<span style="color: var(--accent-red)">⚠️ Error: ${error.message}</span>`);
+                    showToast('Failed to continue conversation', 'error');
+                } finally {
+                    sendBtn.disabled = false;
+                    btnText.textContent = 'Send';
+                }
+            }
+
+            // Handle agent response
+            function handleAgentResponse(data) {
+                // Check if clarification is needed
+                if (data.status === 'needs_clarification' || data.clarifying_questions) {
+                    conversationState = 'clarifying';
+
+                    let clarificationHTML = `<p>${data.message || 'I need more information to help you:'}</p>`;
+
+                    if (data.clarifying_questions && data.clarifying_questions.length > 0) {
+                        clarificationHTML += '<div class="clarification-options">';
+                        data.clarifying_questions.forEach((question, idx) => {
+                            clarificationHTML += `
+              <button class="clarification-btn" onclick="handleClarification('${escapeHtml(question)}')">
+                ${question}
+              </button>
+            `;
+                        });
+                        clarificationHTML += '</div>';
+                    }
+
+                    addMessage('agent', clarificationHTML);
+                }
+                // Check if we have fee data
+                else if (data.fee_breakdown || data.fees) {
+                    conversationState = 'completed';
+
+                    let responseHTML = `<p>${data.summary || data.message || 'Here are the fees:'}</p>`;
+
+                    // Add fee breakdown if available
+                    const fees = data.fee_breakdown || data.fees || [];
+                    if (fees.length > 0) {
+                        responseHTML += '<div class="fee-breakdown">';
+                        fees.forEach(fee => {
+                            responseHTML += `
+              <div class="fee-item">
+                <div class="fee-label">${fee.component || fee.name || 'Fee'}</div>
+                <div class="fee-value">${fee.cost || fee.value || 'N/A'}</div>
+              </div>
+            `;
+                        });
+                        responseHTML += '</div>';
+                    }
+
+                    // Add source citation
+                    if (data.source_url) {
+                        responseHTML += `
+            <a href="${data.source_url}" target="_blank" class="source-citation">
+              📄 Official Source
+            </a>
+          `;
+                    }
+
+                    // Add approval status
+                    if (data.approval_status === 'pending' || data.status === 'pending_approval') {
+                        responseHTML += `
+            <div class="approval-status pending">
+              ⏳ Pending Admin Approval
+            </div>
+          `;
+
+                        if (data.approval_link) {
+                            responseHTML += `
+              <a href="${data.approval_link}" target="_blank" class="approval-link">
+                🔐 Approve Action
+              </a>
+            `;
+                        }
+                    } else if (data.approval_status === 'approved') {
+                        responseHTML += `
+            <div class="approval-status approved">
+              ✓ Approved & Logged
+            </div>
+          `;
+                    }
+
+                    addMessage('agent', responseHTML);
+                }
+                // General message response
+                else if (data.message) {
+                    addMessage('agent', `<p>${data.message}</p>`);
+                }
+                // Fallback
+                else {
+                    addMessage('agent', `<pre>${JSON.stringify(data, null, 2)}</pre>`);
+                }
+            }
+
+            // Utility: Escape HTML
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            // Auto-resize textarea
+            const textarea = document.getElementById('userQuery');
+            textarea.addEventListener('input', function () {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+            });
+
+            // Send on Enter (Shift+Enter for new line)
+            textarea.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // Add welcome message on load
+            window.addEventListener('load', function () {
+                setTimeout(() => {
+                    addMessage('agent', `
+          <p>👋 Hello! I'm your INDMoney Fees AI Agent.</p>
+          <p>I can help explain charges for <strong>US Stocks</strong>, <strong>Mutual Funds</strong>, and <strong>Indian Stocks</strong>. All my answers are backed by official sources.</p>
+          <p>What would you like to know?</p>
+        `);
+                }, 500);
+            });
+        </script>
+
+</body>
+
+</html>
