@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INDmoney Fees Agent - API Workflow Tester</title>
+    <meta name="description"
+        content="Interactive API testing interface for INDmoney Fees Agent with 3-step workflow visualization">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #13131a;
+            --bg-card: #1a1a24;
+            --bg-input: #22222e;
+            --accent-primary: #6366f1;
+            --accent-secondary: #8b5cf6;
+            --accent-tertiary: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --border: #2d2d3a;
+            --glow: rgba(99, 102, 241, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Gradient Background Animation */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(236, 72, 153, 0.06) 0%, transparent 50%);
+            animation: gradientShift 20s ease infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes gradientShift {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 4rem 2rem 2rem;
+            position: relative;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding: 0.5rem 1.5rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 2rem;
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.3);
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes logoFloat {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.2rem;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-tertiary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        /* Workflow Diagram */
+        .workflow-diagram {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            margin: 3rem 0;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .workflow-diagram::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+
+            0%,
+            100% {
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .workflow-steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3rem;
+            position: relative;
+        }
+
+        .workflow-step {
+            position: relative;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .step-number {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1.5rem;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .workflow-step.active .step-number {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-color: var(--accent-primary);
+            color: white;
+            box-shadow: 0 10px 30px var(--glow);
+            transform: scale(1.1);
+        }
+
+        .workflow-step.completed .step-number {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .workflow-step.completed .step-number::after {
+            content: '✓';
+            position: absolute;
+            font-size: 1.5rem;
+        }
+
+        .step-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .step-description {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Arrow between steps */
+        .workflow-step:not(:last-child)::after {
+            content: '→';
+            position: absolute;
+            top: 32px;
+            right: -3rem;
+            font-size: 2rem;
+            color: var(--border);
+            z-index: -1;
+        }
+
+        .workflow-step.completed:not(:last-child)::after {
+            color: var(--success);
+        }
+
+        /* Testing Panel */
+        .testing-panel {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .step-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .step-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .step-card.active {
+            border-color: var(--accent-primary);
+            box-shadow: 0 20px 60px rgba(99, 102, 241, 0.15);
+        }
+
+        .step-card.active::before {
+            background: linear-gradient(180deg, var(--accent-primary), var(--accent-secondary));
+        }
+
+        .step-card.completed::before {
+            background: var(--success);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .step-badge {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-input);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .step-card.active .step-badge {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            box-shadow: 0 8px 20px var(--glow);
+        }
+
+        .card-title h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-badge.pending {
+            background: rgba(100, 116, 139, 0.2);
+            color: var(--text-muted);
+        }
+
+        .status-badge.active {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--accent-primary);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .status-badge.completed {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+
+        .input-hint {
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        button {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.4);
+        }
+
+        button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button.loading {
+            position: relative;
+            color: transparent;
+        }
+
+        button.loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Response Display */
+        .response-container {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            display: none;
+        }
+
+        .response-container.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .response-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .response-header h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .copy-btn {
+            padding: 0.5rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            box-shadow: none;
+        }
+
+        .response-content {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .response-content pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-box strong {
+            color: var(--accent-primary);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-box code {
+            background: var(--bg-input);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transform: translateY(150%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+        }
+
+        .toast.success {
+            border-color: var(--success);
+        }
+
+        .toast.error {
+            border-color: var(--error);
+        }
+
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .toast.success .toast-icon {
+            background: var(--success);
+            color: white;
+        }
+
+        .toast.error .toast-icon {
+            background: var(--error);
+            color: white;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 4rem 2rem 2rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .workflow-steps {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .workflow-step::after {
+                content: '↓';
+                top: auto;
+                bottom: -2rem;
+                right: 50%;
+                transform: translateX(50%);
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">₹</div>
+                <span style="font-weight: 700; font-size: 1.1rem;">INDmoney</span>
+            </div>
+            <h1>Fees Agent API Tester</h1>
+            <p class="subtitle">Interactive 3-Step Workflow Testing Interface</p>
+        </header>
+
+        <!-- Workflow Visualization -->
+        <div class="workflow-diagram">
+            <div class="workflow-steps">
+                <div class="workflow-step" id="visual-step-1">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Initiate Query</div>
+                    <div class="step-description">Start the conversation and receive session ID</div>
+                </div>
+                <div class="workflow-step" id="visual-step-2">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Provide Context</div>
+                    <div class="step-description">Send specific intent with session ID</div>
+                </div>
+                <div class="workflow-step" id="visual-step-3">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Approval</div>
+                    <div class="step-description">Trigger final approval process</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Testing Panel -->
+        <div class="testing-panel">
+            <!-- Step 1 -->
+            <div class="step-card active" id="card-step-1">
+                <div class="card-header">
+                    <div class="card-title">
+                        <div class="step-badge">1</div>
+                        <h3>Initiate Query</h3>
+                    </div>
+                    <span class="status-badge active">Active</span>
+                </div>
+
+                <div class="info-box">
+                    <strong>Endpoint:</strong> POST /webhook/indmoney-fees-agent
+                    <br>
+                    <strong>Purpose:</strong> Start the conversation and capture the session_id for next steps
+                </div>
+
+                <div class="form-group">
+                    <label for="user-query">User Query</label>
+                    <textarea id="user-query" rows="3"
+                        placeholder="What are the charges for US stock trading?">What are the charges for US stock trading?</textarea>
+                    <div class="input-hint">Enter your question about fees and charges</div>
+                </div>
+
+                <button id="btn-step-1" onclick="executeStep1()">
+                    <span>🚀 Execute Step 1</span>
+                </button>
+
+                <div class="response-container" id="response-step-1">
+                    <div class="response-header">
+                        <h4>Response</h4>
+                        <button class="copy-btn" onclick="copyResponse('response-step-1-content')">📋 Copy</button>
+                    </div>
+                    <div class="response-content" id="response-step-1-content"></div>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="step-card" id="card-step-2">
+                <div class="card-header">
+                    <div class="card-title">
+                        <div class="step-badge">2</div>
+                        <h3>Provide Context</h3>
+                    </div>
+                    <span class="status-badge pending">Pending</span>
+                </div>
+
+                <div class="info-box">
+                    <strong>Endpoint:</strong> POST /webhook/indmoney-fees-continue
+                    <br>
+                    <strong>Purpose:</strong> Pass specific user intent linked to the original query
+                </div>
+
+                <div class="form-group">
+                    <label for="session-id">Session ID (from Step 1)</label>
+                    <input type="text" id="session-id" placeholder="Will be auto-populated from Step 1" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="answers">Specific Context / Answers</label>
+                    <textarea id="answers" rows="3"
+                        placeholder="I want to invest in US stocks via SIP">I want to invest in US stocks via SIP</textarea>
+                    <div class="input-hint">Provide more specific details about your query</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="original-query">Original Query (from Step 1)</label>
+                    <input type="text" id="original-query" placeholder="Will be auto-populated from Step 1" readonly>
+                </div>
+
+                <button id="btn-step-2" onclick="executeStep2()" disabled>
+                    <span>⚡ Execute Step 2</span>
+                </button>
+
+                <div class="response-container" id="response-step-2">
+                    <div class="response-header">
+                        <h4>Response</h4>
+                        <button class="copy-btn" onclick="copyResponse('response-step-2-content')">📋 Copy</button>
+                    </div>
+                    <div class="response-content" id="response-step-2-content"></div>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="step-card" id="card-step-3">
+                <div class="card-header">
+                    <div class="card-title">
+                        <div class="step-badge">3</div>
+                        <h3>Approval</h3>
+                    </div>
+                    <span class="status-badge pending">Pending</span>
+                </div>
+
+                <div class="info-box">
+                    <strong>Endpoint:</strong> GET /webhook-test/indmoney-fees-approve
+                    <br>
+                    <strong>Purpose:</strong> Trigger final approval process
+                </div>
+
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                    This is a simple GET request that triggers the approval workflow. No additional data is required.
+                </p>
+
+                <button id="btn-step-3" onclick="executeStep3()" disabled>
+                    <span>✅ Execute Step 3</span>
+                </button>
+
+                <div class="response-container" id="response-step-3">
+                    <div class="response-header">
+                        <h4>Response</h4>
+                        <button class="copy-btn" onclick="copyResponse('response-step-3-content')">📋 Copy</button>
+                    </div>
+                    <div class="response-content" id="response-step-3-content"></div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="footer-links">
+                <a href="index.html">← Back to Dashboard</a>
+                <a href="https://github.com" target="_blank">Documentation</a>
+                <a href="#" onclick="resetWorkflow(); return false;">Reset Workflow</a>
+            </div>
+            <p>INDmoney Fees Agent API Testing Interface • Built with ❤️</p>
+        </footer>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <div class="toast-icon">✓</div>
+        <div class="toast-message"></div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'https://anjali71826.app.n8n.cloud';
+
+        // State Management
+        let workflowState = {
+            step1Complete: false,
+            step2Complete: false,
+            step3Complete: false,
+            sessionId: null,
+            userQuery: null
+        };
+
+        // Toast Notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = toast.querySelector('.toast-icon');
+            const messageEl = toast.querySelector('.toast-message');
+
+            toast.className = `toast ${type}`;
+            icon.textContent = type === 'success' ? '✓' : '✕';
+            messageEl.textContent = message;
+
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Update UI State
+        function updateStepState(stepNum, status) {
+            const card = document.getElementById(`card-step-${stepNum}`);
+            const badge = card.querySelector('.status-badge');
+            const visualStep = document.getElementById(`visual-step-${stepNum}`);
+
+            card.classList.remove('active', 'completed');
+            visualStep.classList.remove('active', 'completed');
+            badge.classList.remove('active', 'pending', 'completed');
+
+            if (status === 'active') {
+                card.classList.add('active');
+                visualStep.classList.add('active');
+                badge.classList.add('active');
+                badge.textContent = 'Active';
+            } else if (status === 'completed') {
+                card.classList.add('completed');
+                visualStep.classList.add('completed');
+                badge.classList.add('completed');
+                badge.textContent = 'Completed';
+            } else {
+                badge.classList.add('pending');
+                badge.textContent = 'Pending';
+            }
+        }
+
+        // Display Response
+        function displayResponse(stepNum, data) {
+            const container = document.getElementById(`response-step-${stepNum}`);
+            const content = document.getElementById(`response-step-${stepNum}-content`);
+
+            content.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            container.classList.add('show');
+        }
+
+        // Copy Response
+        function copyResponse(elementId) {
+            const content = document.getElementById(elementId);
+            const text = content.textContent;
+
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Response copied to clipboard!', 'success');
+            }).catch(() => {
+                showToast('Failed to copy response', 'error');
+            });
+        }
+
+        // Step 1: Initiate Query
+        async function executeStep1() {
+            const btn = document.getElementById('btn-step-1');
+            const userQuery = document.getElementById('user-query').value.trim();
+
+            if (!userQuery) {
+                showToast('Please enter a user query', 'error');
+                return;
+            }
+
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/webhook/indmoney-fees-agent`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_query: userQuery
+                    })
+                });
+
+                const data = await response.json();
+
+                // Extract session ID (adjust based on actual response structure)
+                const sessionId = data.session_id || `session_${Date.now()}`;
+
+                // Update state
+                workflowState.step1Complete = true;
+                workflowState.sessionId = sessionId;
+                workflowState.userQuery = userQuery;
+
+                // Update UI
+                document.getElementById('session-id').value = sessionId;
+                document.getElementById('original-query').value = userQuery;
+                displayResponse(1, data);
+                updateStepState(1, 'completed');
+                updateStepState(2, 'active');
+
+                // Enable Step 2
+                document.getElementById('btn-step-2').disabled = false;
+
+                showToast('Step 1 completed successfully!', 'success');
+
+            } catch (error) {
+                showToast(`Error: ${error.message}`, 'error');
+                displayResponse(1, { error: error.message });
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        }
+
+        // Step 2: Provide Context
+        async function executeStep2() {
+            const btn = document.getElementById('btn-step-2');
+            const sessionId = document.getElementById('session-id').value;
+            const answers = document.getElementById('answers').value.trim();
+            const originalQuery = document.getElementById('original-query').value;
+
+            if (!answers) {
+                showToast('Please provide specific context/answers', 'error');
+                return;
+            }
+
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/webhook/indmoney-fees-continue`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        answers: answers,
+                        original_query: originalQuery
+                    })
+                });
+
+                const data = await response.json();
+
+                // Update state
+                workflowState.step2Complete = true;
+
+                // Update UI
+                displayResponse(2, data);
+                updateStepState(2, 'completed');
+                updateStepState(3, 'active');
+
+                // Enable Step 3
+                document.getElementById('btn-step-3').disabled = false;
+
+                showToast('Step 2 completed successfully!', 'success');
+
+            } catch (error) {
+                showToast(`Error: ${error.message}`, 'error');
+                displayResponse(2, { error: error.message });
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        }
+
+        // Step 3: Approval
+        async function executeStep3() {
+            const btn = document.getElementById('btn-step-3');
+
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`http://anjali71826.app.n8n.cloud/webhook-test/indmoney-fees-approve`, {
+                    method: 'GET'
+                });
+
+                const data = await response.json();
+
+                // Update state
+                workflowState.step3Complete = true;
+
+                // Update UI
+                displayResponse(3, data);
+                updateStepState(3, 'completed');
+
+                showToast('✨ Workflow completed successfully!', 'success');
+
+            } catch (error) {
+                showToast(`Error: ${error.message}`, 'error');
+                displayResponse(3, { error: error.message });
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        }
+
+        // Reset Workflow
+        function resetWorkflow() {
+            workflowState = {
+                step1Complete: false,
+                step2Complete: false,
+                step3Complete: false,
+                sessionId: null,
+                userQuery: null
+            };
+
+            // Reset UI
+            updateStepState(1, 'active');
+            updateStepState(2, 'pending');
+            updateStepState(3, 'pending');
+
+            // Reset forms
+            document.getElementById('user-query').value = 'What are the charges for US stock trading?';
+            document.getElementById('session-id').value = '';
+            document.getElementById('answers').value = 'I want to invest in US stocks via SIP';
+            document.getElementById('original-query').value = '';
+
+            // Reset buttons
+            document.getElementById('btn-step-1').disabled = false;
+            document.getElementById('btn-step-2').disabled = true;
+            document.getElementById('btn-step-3').disabled = true;
+
+            // Hide responses
+            document.querySelectorAll('.response-container').forEach(el => {
+                el.classList.remove('show');
+            });
+
+            showToast('Workflow reset successfully', 'success');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('INDmoney Fees Agent API Tester Initialized');
+        });
+    </script>
+</body>
+
+</html>

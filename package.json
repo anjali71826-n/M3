@@ -1,0 +1,12 @@
+{
+    "name": "indmoney-fee-agent-ui",
+    "version": "1.0.0",
+    "description": "Frontend UI for INDmoney Fee Assistant Agent",
+    "scripts": {
+        "start": "serve .",
+        "dev": "serve ."
+    },
+    "dependencies": {
+        "serve": "^14.2.0"
+    }
+}

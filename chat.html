@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INDmoney Fee Assistant | AI Chat</title>
+    <meta name="description"
+        content="Get instant answers about INDmoney fees and charges through our AI-powered chat assistant">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-chat: #13131a;
+            --bg-message: #1a1a24;
+            --accent: #6366f1;
+            --accent-light: #818cf8;
+            --success: #10b981;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --border: #2d2d3a;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 50%, rgba(99, 102, 241, 0.06) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(139, 92, 246, 0.06) 0%, transparent 50%);
+            animation: pulse 15s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        /* Header */
+        header {
+            position: relative;
+            z-index: 10;
+            padding: 1.5rem 2rem;
+            background: rgba(26, 26, 36, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .brand-text h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .brand-text p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 2rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--success);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: blink 2s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        /* Chat Container */
+        .chat-container {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        /* Messages Area */
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .messages::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        .message {
+            display: flex;
+            gap: 1rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .message.bot .avatar {
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .message.user .avatar {
+            background: var(--bg-message);
+            border: 1px solid var(--border);
+        }
+
+        .message-content {
+            max-width: 70%;
+        }
+
+        .message.user .message-content {
+            background: var(--bg-message);
+            border: 1px solid var(--border);
+            padding: 1rem 1.25rem;
+            border-radius: 1.25rem 1.25rem 0.25rem 1.25rem;
+        }
+
+        .message.bot .message-content {
+            background: transparent;
+        }
+
+        .message.bot .message-text {
+            background: var(--bg-message);
+            border: 1px solid var(--border);
+            padding: 1rem 1.25rem;
+            border-radius: 1.25rem 1.25rem 1.25rem 0.25rem;
+            line-height: 1.6;
+        }
+
+        .message-text p {
+            margin-bottom: 0.75rem;
+        }
+
+        .message-text p:last-child {
+            margin-bottom: 0;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem 1.25rem;
+            background: var(--bg-message);
+            border: 1px solid var(--border);
+            border-radius: 1.25rem 1.25rem 1.25rem 0.25rem;
+            width: fit-content;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+            }
+
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Input Area */
+        .input-area {
+            position: relative;
+            z-index: 10;
+            padding: 1.5rem 2rem 2rem;
+            background: rgba(26, 26, 36, 0.8);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border);
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .input-container {
+            flex: 1;
+            background: var(--bg-message);
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            padding: 0.75rem 1.25rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .input-container:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        textarea {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+            resize: none;
+            outline: none;
+            max-height: 120px;
+            line-height: 1.5;
+        }
+
+        textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        .send-button {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            border: none;
+            border-radius: 1.25rem;
+            color: white;
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+            flex-shrink: 0;
+        }
+
+        .send-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.4);
+        }
+
+        .send-button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .send-button.loading {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Quick Suggestions */
+        .quick-suggestions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .suggestion-chip {
+            padding: 0.5rem 1rem;
+            background: var(--bg-message);
+            border: 1px solid var(--border);
+            border-radius: 2rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .suggestion-chip:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Welcome Screen */
+        .welcome {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .welcome-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin: 0 auto 2rem;
+            box-shadow: 0 20px 60px rgba(99, 102, 241, 0.4);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .welcome h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(135deg, var(--accent), #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .welcome p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Settings Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .settings-modal {
+            background: var(--bg-message);
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            width: 90%;
+            max-width: 400px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            color: white;
+            font-size: 1rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1em;
+        }
+
+        .save-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .settings-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .settings-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .message-content {
+                max-width: 85%;
+            }
+
+            .welcome h2 {
+                font-size: 1.5rem;
+            }
+
+            header {
+                padding: 1rem;
+            }
+
+            .brand-text h1 {
+                font-size: 1rem;
+            }
+
+            .brand-text p {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="brand">
+            <div class="brand-icon">₹</div>
+            <div class="brand-text">
+                <h1>INDmoney Fee Assistant</h1>
+                <p>AI-Powered Fee Explainer</p>
+            </div>
+        </div>
+        <div style="display:flex; gap:1rem; align-items:center">
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                Online
+            </div>
+            <button class="settings-btn" onclick="openSettings()" title="API Settings">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                    </path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <div class="chat-container">
+        <div class="messages" id="messages">
+            <div class="welcome">
+                <div class="welcome-icon">💬</div>
+                <h2>Hi! I'm your Fee Assistant</h2>
+                <p>Ask me anything about INDmoney fees and charges</p>
+                <div class="quick-suggestions">
+                    <div class="suggestion-chip"
+                        onclick="sendQuickQuestion('What are the charges for US stock trading?')">
+                        US Stock Charges
+                    </div>
+                    <div class="suggestion-chip" onclick="sendQuickQuestion('Tell me about mutual fund fees')">
+                        Mutual Fund Fees
+                    </div>
+                    <div class="suggestion-chip" onclick="sendQuickQuestion('Are there any hidden charges?')">
+                        Hidden Charges?
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <div class="input-wrapper">
+                <div class="input-container">
+                    <textarea id="userInput" placeholder="Ask about fees, charges, or investment costs..." rows="1"
+                        onkeydown="handleKeyPress(event)"></textarea>
+                </div>
+                <button class="send-button" id="sendBtn" onclick="sendMessage()">
+                    <span id="sendIcon">➤</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="settings-modal">
+            <div class="modal-header">
+                <h3>API Configuration</h3>
+                <button class="close-btn" onclick="closeSettings()">×</button>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Authentication Type</label>
+                <select class="form-select" id="authType" onchange="toggleAuthFields()">
+                    <option value="none">None</option>
+                    <option value="basic" selected>Basic Auth</option>
+                    <option value="header">Header Auth</option>
+                </select>
+            </div>
+
+            <div id="basicAuthFields">
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input type="text" class="form-input" id="authUsername" placeholder="Enter username">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-input" id="authPassword" placeholder="Enter password">
+                </div>
+            </div>
+
+            <div id="headerAuthFields" style="display:none">
+                <div class="form-group">
+                    <label class="form-label">Header Name</label>
+                    <input type="text" class="form-input" id="authHeaderName" value="Authorization"
+                        placeholder="e.g. Authorization">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Header Value</label>
+                    <input type="password" class="form-input" id="authHeaderValue" placeholder="e.g. Bearer token">
+                </div>
+            </div>
+
+            <button class="save-btn" onclick="saveSettings()">Save Configuration</button>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE = 'https://anjali71826.app.n8n.cloud/webhook/indmoney-fees';
+
+        // Auth State
+        let authConfig = {
+            type: 'header',
+            username: '',
+            password: '',
+            headerName: 'Authorization',
+            headerValue: '__n8n_BLANK_VALUE_e5362baf-c777-4d57-a609-6eaf1f9e87f6'
+        };
+
+        // State
+        let sessionId = null;
+        let awaitingFollowup = false;
+        let originalQuery = null;
+
+        // ------------- SETTINGS LOGIC -------------
+        function openSettings() {
+            document.getElementById('settingsModal').classList.add('show');
+            // Load saved settings
+            const saved = localStorage.getItem('n8n_auth');
+            if (saved) {
+                authConfig = JSON.parse(saved);
+                document.getElementById('authType').value = authConfig.type;
+                document.getElementById('authUsername').value = authConfig.username || '';
+                document.getElementById('authPassword').value = authConfig.password || '';
+                document.getElementById('authHeaderName').value = authConfig.headerName || 'Authorization';
+                document.getElementById('authHeaderValue').value = authConfig.headerValue || '';
+            }
+            toggleAuthFields();
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.remove('show');
+        }
+
+        function toggleAuthFields() {
+            const type = document.getElementById('authType').value;
+            const basic = document.getElementById('basicAuthFields');
+            const header = document.getElementById('headerAuthFields');
+
+            if (type === 'basic') {
+                basic.style.display = 'block';
+                header.style.display = 'none';
+            } else if (type === 'header') {
+                basic.style.display = 'none';
+                header.style.display = 'block';
+            } else {
+                basic.style.display = 'none';
+                header.style.display = 'none';
+            }
+        }
+
+        function saveSettings() {
+            authConfig = {
+                type: document.getElementById('authType').value,
+                username: document.getElementById('authUsername').value,
+                password: document.getElementById('authPassword').value,
+                headerName: document.getElementById('authHeaderName').value,
+                headerValue: document.getElementById('authHeaderValue').value
+            };
+            localStorage.setItem('n8n_auth', JSON.stringify(authConfig));
+            closeSettings();
+            addMessage("✅ Configuration saved! Please try your query again.", false);
+        }
+
+        // Get headers based on config
+        function getHeaders() {
+            const headers = { 'Content-Type': 'application/json' };
+
+            if (authConfig.type === 'basic' && authConfig.username && authConfig.password) {
+                const token = btoa(`${authConfig.username}:${authConfig.password}`);
+                headers['Authorization'] = `Basic ${token}`;
+            } else if (authConfig.type === 'header' && authConfig.headerName && authConfig.headerValue) {
+                headers[authConfig.headerName] = authConfig.headerValue;
+            }
+
+            return headers;
+        }
+
+        // DOM Elements
+        const messages = document.getElementById('messages');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const sendIcon = document.getElementById('sendIcon');
+
+        // Auto-resize textarea
+        userInput.addEventListener('input', function () {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        // Handle Enter key
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // Quick question
+        function sendQuickQuestion(question) {
+            userInput.value = question;
+            sendMessage();
+        }
+
+        // Add message to chat
+        function addMessage(text, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.textContent = isUser ? '👤' : '🤖';
+
+            const content = document.createElement('div');
+            content.className = 'message-content';
+
+            if (isUser) {
+                content.textContent = text;
+            } else {
+                const messageText = document.createElement('div');
+                messageText.className = 'message-text';
+                messageText.innerHTML = text;
+                content.appendChild(messageText);
+            }
+
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(content);
+            messages.appendChild(messageDiv);
+
+            // Scroll to bottom
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        // Show typing indicator
+        function showTyping() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot';
+            typingDiv.id = 'typing';
+
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.textContent = '🤖';
+
+            const content = document.createElement('div');
+            content.className = 'message-content';
+
+            const indicator = document.createElement('div');
+            indicator.className = 'typing-indicator';
+            indicator.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+
+            content.appendChild(indicator);
+            typingDiv.appendChild(avatar);
+            typingDiv.appendChild(content);
+            messages.appendChild(typingDiv);
+
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        // Remove typing indicator
+        function hideTyping() {
+            const typing = document.getElementById('typing');
+            if (typing) typing.remove();
+        }
+
+        // Format bot response - STRICTLY NO JSON
+        function formatResponse(data) {
+            let content = data.fee_explanation || data;
+
+            // 1. If it's a string, check if it's actually a JSON string
+            if (typeof content === 'string') {
+                try {
+                    if (content.trim().startsWith('{') || content.trim().startsWith('[')) {
+                        content = JSON.parse(content);
+                    } else {
+                        return content; // It's just a normal string
+                    }
+                } catch (e) {
+                    return content; // Parsing failed, treat as text
+                }
+            }
+
+            // 2. Now handle the object (either originally object or parsed from string)
+            if (typeof content === 'object' && content !== null) {
+                // Check common fields first
+                const fmt = content.formatted || content;
+
+                if (fmt.summary && Array.isArray(fmt.summary)) {
+                    return fmt.summary.map(line => `<p>• ${line}</p>`).join('');
+                }
+                if (fmt.answer && Array.isArray(fmt.answer)) {
+                    return fmt.answer.join('<br><br>');
+                }
+                if (fmt.formatted_output) {
+                    return fmt.formatted_output;
+                }
+
+                // 3. Fallback: Convert Object to Readable Text List (Key: Value)
+                // NEVER return JSON.stringify
+                let readableHtml = '';
+                for (const [key, value] of Object.entries(fmt)) {
+                    // Skip internal fields or empty values
+                    if (key === 'formatted' || key === 'unknown' || !value) continue;
+
+                    let displayValue = value;
+                    if (typeof value === 'object') {
+                        // Recurse simply for one level or just join arrays
+                        displayValue = Array.isArray(value) ? value.join(', ') : 'Details below';
+                    }
+
+                    // Format keys nicely (e.g., "fee_type" -> "Fee Type")
+                    const displayKey = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+                    readableHtml += `<p><strong>${displayKey}:</strong> ${displayValue}</p>`;
+                }
+
+                return readableHtml || "I found some data but couldn't format it perfectly. Please try asking specifically about a fee type.";
+            }
+
+            return "I've processed your request.";
+        }
+
+        // Send message
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            // Clear welcome screen if present
+            const welcome = messages.querySelector('.welcome');
+            if (welcome) welcome.remove();
+
+            // Add user message
+            addMessage(text, true);
+            userInput.value = '';
+            userInput.style.height = 'auto';
+
+            // Disable input
+            sendBtn.disabled = true;
+            sendIcon.textContent = '⏳';
+            sendBtn.classList.add('loading');
+
+            // Show typing
+            showTyping();
+
+            try {
+                let response, data;
+
+                // Get configured headers
+                const authHeaders = getHeaders();
+
+                if (awaitingFollowup) {
+                    // Step 2: Continue with context
+                    response = await fetch(`${API_BASE}-continue`, {
+                        method: 'POST',
+                        headers: authHeaders,
+                        body: JSON.stringify({
+                            session_id: sessionId,
+                            answers: text,
+                            original_query: originalQuery
+                        })
+                    });
+
+                    // Better response parsing
+                    const contentType = response.headers.get('content-type');
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        if (response.status === 403 || response.status === 401) {
+                            throw new Error("Authentication failed. Please click the Settings (⚙️) icon in the top right and enter your N8N Basic Auth credentials.");
+                        }
+                        throw new Error(`API Error (${response.status}): ${errorText}`);
+                    }
+
+                    if (contentType && contentType.includes('application/json')) {
+                        data = await response.json();
+                    } else {
+                        const textResponse = await response.text();
+                        data = { message: textResponse };
+                    }
+
+                    // Auto-trigger REMOVED. Now handled by UI button.
+                    awaitingFollowup = false;
+                } else {
+                    // Step 1: Initial query
+                    response = await fetch(`${API_BASE}-agent`, {
+                        method: 'POST',
+                        headers: authHeaders,
+                        body: JSON.stringify({
+                            user_query: text
+                        })
+                    });
+
+                    // Better response parsing
+                    const contentType = response.headers.get('content-type');
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        if (response.status === 403 || response.status === 401) {
+                            throw new Error("Authentication failed. Please click the Settings (⚙️) icon in the top right and enter your N8N Basic Auth credentials.");
+                        }
+                        throw new Error(`API Error (${response.status}): ${errorText}`);
+                    }
+
+                    if (contentType && contentType.includes('application/json')) {
+                        data = await response.json();
+                    } else {
+                        const textResponse = await response.text();
+                        data = { message: textResponse };
+                    }
+
+                    // Store session info
+                    sessionId = data.session_id || `session_${Date.now()}`;
+                    originalQuery = text;
+                }
+
+                hideTyping();
+
+                // Handle response
+                if (data.stage === 'clarification') {
+                    awaitingFollowup = true;
+                    let responseText = "I need a bit more information:<br><br>";
+                    if (data.questions && Array.isArray(data.questions)) {
+                        responseText += data.questions.map(q => `• ${q}`).join('<br>');
+                    }
+                    addMessage(responseText);
+                } else if (data.fee_explanation) {
+                    // Show explanation AND Approve button
+                    const explanationHtml = formatResponse(data);
+                    addMessage(explanationHtml);
+                    addApproveButton();
+                } else if (data.message) {
+                    addMessage(data.message);
+                } else {
+                    addMessage("I've received your query. How else can I help?");
+                }
+
+            } catch (error) {
+                hideTyping();
+                addMessage(`❌ ${error.message}`);
+                // Open settings if auth error
+                if (error.message.includes('Authentication failed')) {
+                    setTimeout(openSettings, 1500);
+                }
+            } finally {
+                // Re-enable input
+                sendBtn.disabled = false;
+                sendIcon.textContent = '➤';
+                sendBtn.classList.remove('loading');
+                userInput.focus();
+            }
+        }
+
+        // Add Approve Button
+        function addApproveButton() {
+            const buttonDiv = document.createElement('div');
+            buttonDiv.className = 'message bot';
+            buttonDiv.style.marginTop = '-10px'; // Closer to previous message
+
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.style.visibility = 'hidden'; // Hidden avatar for alignment
+
+            const content = document.createElement('div');
+            content.className = 'message-content';
+
+            const btn = document.createElement('button');
+            btn.className = 'suggestion-chip'; // Reuse chip style
+            btn.style.background = 'var(--accent)';
+            btn.style.color = 'white';
+            btn.style.border = 'none';
+            btn.innerHTML = '✅ Approve Response';
+            btn.onclick = function () { triggerApproval(this); };
+
+            content.appendChild(btn);
+            buttonDiv.appendChild(avatar);
+            buttonDiv.appendChild(content);
+            messages.appendChild(buttonDiv);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        // Trigger Approval
+        async function triggerApproval(btnElement) {
+            btnElement.disabled = true;
+            btnElement.innerHTML = '⏳ Approving...';
+            btnElement.style.opacity = '0.7';
+
+            try {
+                const authHeaders = getHeaders();
+                await fetch(`https://anjali71826.app.n8n.cloud/webhook/indmoney-fees-approve`, {
+                    method: 'POST',
+                    headers: authHeaders
+                });
+
+                btnElement.innerHTML = '✅ Approved';
+                btnElement.style.background = 'var(--success)';
+                btnElement.style.cursor = 'default';
+
+            } catch (e) {
+                console.error(e);
+                btnElement.innerHTML = '❌ Failed. Retry?';
+                btnElement.disabled = false;
+                btnElement.style.background = '#ef4444';
+                btnElement.onclick = function () { triggerApproval(this); };
+            }
+        }
+
+        // Focus input on load and load saved settings
+        window.addEventListener('load', () => {
+            // Check if auth is configured
+            const saved = localStorage.getItem('n8n_auth');
+            if (saved) {
+                authConfig = JSON.parse(saved);
+            }
+            userInput.focus();
+        });
+    </script>
+</body>
+
+</html>
